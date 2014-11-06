@@ -1,5 +1,6 @@
 #include <arduino/Arduino.h>
 #include <sensor/two_phase_incremental_encoder.hpp>
+#include <Wire.h>
 
 
 #define motorPin  9//11
@@ -22,6 +23,8 @@ float tetha = 0,tethaEnc=0,tethaMem=0,degMoved=0;
 long now_tickTest=0, tickTest=0,last_tickTest=0;
 long timeOtherNew = 0, timeOtherOld = 0;
 int lastDir = 0;
+uint8_t buffer[10];
+int received_data;
 
 
 void setup() {
@@ -318,21 +321,46 @@ class Motor {
     }
 };
 
+void receiveEvent(int howMany)
+{
+  int i = 0;
+  while(0 < Wire.available()) // loop through all
+  {
+    buffer[i] = Wire.read(); // receive byte as a character
+    i++;
+  }
+
+  int checksum= (buffer[8] << 8);
+  checksum |= buffer[7];
+  if(checksum == (buffer[0] + buffer[1] + buffer[2] + buffer[3] + buffer[4] + buffer[9])) Serial.println("OK");
+  else Serial.println("ERROR");
+
+  // received_data = (buffer[6] << 8);
+  // received_data |= (buffer[5]);
+
+  // Serial.println(received_data);
+
+}
+
 int main() {
   
   init();
-  setup();
-  Motor motor;
+  // setup();
+  // Motor motor;
 
-  float x;// a speed order from master
-  long timeNow = 0, timeOld = 0;
-  long setPOINT;
-  int counter=0, countSetP=0;
-  long timeStamp = 0;
-  motor.servoInit();
-  setPOINT = 0;
-  delay(1000);
-  uint8_t buffer[11];
+  Serial.begin(9600);
+  Wire.begin(15); // 15 for slave1, 9 for slave2
+  Wire.onReceive(receiveEvent);
+
+
+  // float x;// a speed order from master
+  // long timeNow = 0, timeOld = 0;
+  // long setPOINT;
+  // int counter=0, countSetP=0;
+  // long timeStamp = 0;
+  // motor.servoInit();
+  // setPOINT = 0;
+  // delay(1000);
 
   while (1) {
     // timeNow = millis();
@@ -345,35 +373,29 @@ int main() {
     //   motor.set_degPControl(setPOINT);}
       
     //   Serial.print("setPOINT : "); Serial.print(setPOINT);
+    //   Serial.print(" counter : "); Serial.println(counter);    
+
+    // timeNow = millis();
+    // if(timeNow - timeOld > 1){
+    //   timeOld = timeNow;
+    //   counter++;
+    //   if(counter == 200) {
+    //     // if(setPOINT >= 900) {setPOINT = 300;}
+    //     // else  setPOINT=setPOINT+100;
+    //     if(countSetP == 1) setPOINT = 900;
+    //     else setPOINT = 300;
+    //     counter = 0;
+    //     countSetP = !countSetP;
+    //     }
+    //   if(movingFlag == 1){
+    //   timeStamp = millis();
+    //   motor.set_degPControl(setPOINT);}
+    //   timeStamp = millis() - timeStamp;
+    //   Serial.print("timeStamp : "); Serial.print(timeStamp);
+    //   Serial.print(" setPOINT : "); Serial.print(setPOINT);
     //   Serial.print(" counter : "); Serial.println(counter);
 
-    if (Serial.available() >= 11) {
-      for (int i=0; i<11; i++) {
-        buffer[i] = Serial.read();
-      }
-    }
-
-    timeNow = millis();
-    if(timeNow - timeOld > 1){
-      timeOld = timeNow;
-      counter++;
-      if(counter == 200) {
-        // if(setPOINT >= 900) {setPOINT = 300;}
-        // else  setPOINT=setPOINT+100;
-        if(countSetP == 1) setPOINT = 900;
-        else setPOINT = 300;
-        counter = 0;
-        countSetP = !countSetP;
-        }
-      if(movingFlag == 1){
-      timeStamp = millis();
-      motor.set_degPControl(setPOINT);}
-      timeStamp = millis() - timeStamp;
-      Serial.print("timeStamp : "); Serial.print(timeStamp);
-      Serial.print(" setPOINT : "); Serial.print(setPOINT);
-      Serial.print(" counter : "); Serial.println(counter);
-
-    }
+    // }
 
 
   }

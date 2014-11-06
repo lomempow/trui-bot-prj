@@ -1,6 +1,7 @@
 #include <arduino/Arduino.h>
 #include <comm/arduino_mavlink_packet_handler.hpp>
 #include <comm/custom.h>
+#include <Wire.h>
 
 // void isr() {
 //   const uint8_t channel1= MAVLINK_COMM_1;
@@ -114,7 +115,7 @@ int main() {
   Serial1.begin(9600);
   Serial2.begin(9600);    
   Serial3.begin(9600);
-  // Wire.begin();
+  Wire.begin();
 
   const uint8_t header= 0xCE;
   const uint8_t footer= 0xEE;
@@ -204,46 +205,45 @@ int main() {
     // }
 
     //hit-manipulation slave
-    // int32_t slave_hit1_speed;
-    // int32_t slave_hit2_speed;
-    // int target_pos1;
-    // int target_pos2;
-    // uint8_t buffer_hit1[11];
-    // uint8_t buffer_hit2[11];
+    int slave_hit1_speed = 841;
+    int slave_hit2_speed;
+    int target_pos1= 923;
+    int target_pos2;
+    uint8_t buffer_hit1[10];
+    uint8_t buffer_hit2[10];
 
-    // buffer_hit1[0]= header;
-    // buffer_hit1[10]= footer;
-    // buffer_hit1[1]= hit_mode;
-    // buffer_hit1[2]= hit_flag;
-    // buffer_hit1[6]= (int) ((slave_hit1_speed & 0xFF000000) >> 24);
-    // buffer_hit1[5]= (int) ((slave_hit1_speed & 0x00FF0000) >> 16);
-    // buffer_hit1[4]= (int) ((slave_hit1_speed & 0x0000FF00) >> 8);
-    // buffer_hit1[3]= (int) ((slave_hit1_speed & 0x000000FF));
-    // buffer_hit1[7]= target_pos1;
-    // uint16_t checksum_hit1= buffer_hit1[0] + buffer_hit1[1] + buffer_hit1[2] + buffer_hit1[3] + buffer_hit1[4] + buffer_hit1[5] + buffer_hit1[6] + buffer_hit1[7] + buffer_hit1[10];
-    // buffer_hit1[8]= (int) ((checksum_hit1 & 0x00FF));
-    // buffer_hit1[9]= (int) ((checksum_hit1 & 0xFF00));
+    buffer_hit1[0]= header;
+    buffer_hit1[9]= footer;
+    buffer_hit1[1]= hit_mode;
+    buffer_hit1[2]= hit_flag;
+    buffer_hit1[4]= (slave_hit1_speed >> 8) & 0xFF;
+    buffer_hit1[3]= slave_hit1_speed & 0xFF;
+    buffer_hit1[6]= (target_pos1 >> 8) & 0xFF;
+    buffer_hit1[5]= target_pos1 & 0xFF;
+    uint16_t checksum_hit1= buffer_hit1[0] + buffer_hit1[1] + buffer_hit1[2] + buffer_hit1[3] + buffer_hit1[4] + buffer_hit1[9];
+    buffer_hit1[7]= checksum_hit1 & 0xFF;
+    buffer_hit1[8]= (checksum_hit1 >> 8) & 0xFF;
     
-    // buffer_hit2[0]= header;
-    // buffer_hit2[10]= footer;
-    // buffer_hit2[1]= hit_mode;
-    // buffer_hit2[2]= hit_flag;
-    // buffer_hit2[6]= (int) ((slave_hit2_speed & 0xFF000000) >> 24);
-    // buffer_hit2[5]= (int) ((slave_hit2_speed & 0x00FF0000) >> 16);
-    // buffer_hit2[4]= (int) ((slave_hit2_speed & 0x0000FF00) >> 8);
-    // buffer_hit2[3]= (int) ((slave_hit2_speed & 0x000000FF));
-    // buffer_hit2[7]= target_pos2;
-    // uint16_t checksum_hit2= buffer_hit2[0] + buffer_hit2[1] + buffer_hit2[2] + buffer_hit2[3] + buffer_hit2[4] + buffer_hit2[5] + buffer_hit2[6] + buffer_hit2[7] + buffer_hit2[10];
-    // buffer_hit2[8]= (int) ((checksum_hit2 & 0x00FF));
-    // buffer_hit2[9]= (int) ((checksum_hit2 & 0xFF00));
+    buffer_hit2[0]= header;
+    buffer_hit2[9]= footer;
+    buffer_hit2[1]= hit_mode;
+    buffer_hit2[2]= hit_flag;
+    buffer_hit2[4]= (slave_hit2_speed >> 8) & 0xFF;
+    buffer_hit2[3]= slave_hit2_speed & 0xFF;
+    buffer_hit2[6]= (target_pos2 >> 8) & 0xFF;
+    buffer_hit2[5]= target_pos2 & 0xFF;
+    uint16_t checksum_hit2= buffer_hit2[0] + buffer_hit2[1] + buffer_hit2[2] + buffer_hit2[3] + buffer_hit2[4] + buffer_hit2[9];
+    buffer_hit2[7]= checksum_hit2 & 0xFF;
+    buffer_hit2[8]= (checksum_hit2 >> 8) & 0xFF;
 
-    // Wire.beginTransmission(0x15);
-    // Wire.write(buffer_hit1, 11);
-    // Wire.endTransmission();
+    Wire.beginTransmission(15);
+    Wire.write(buffer_hit1, 10);
+    Wire.endTransmission();
 
-    // Wire.beginTransmission(0x09);
-    // Wire.write(buffer_hit2, 11);
-    // Wire.endTransmission();
+    Wire.beginTransmission(9);
+    Wire.write(buffer_hit2, 10);
+    Wire.endTransmission();
+
     //4. activate timer according to dt using timer overflow interrupt
     //activateTimer();
 

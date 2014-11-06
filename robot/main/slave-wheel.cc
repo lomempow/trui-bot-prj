@@ -86,9 +86,8 @@ int main() {
 
     if (buffer[3] == 0x0C) speed= -1.0 * received_speed;
     else if (buffer[3] == 0xCC) speed= 1.0 * received_speed;
+    
     // Serial.write(buffer[3]);
-
-    // speed= (float) received_speed;
 
     // //2. Identify msg
     // //2A. If msgid = manual_setpoint, set speed control to cmd_speed
