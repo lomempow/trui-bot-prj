@@ -5,10 +5,10 @@
 
 namespace crim {
 
-class EncoderHCTL {
+class EncoderHctl {
  public:
-  EncoderHCTL(size_t en_1_pin, size_t en_2_pin, size_t xy_pin, size_t oe_pin, size_t sel_1_pin, size_t sel_2_pin, size_t reset_x_pin, size_t reset_y_pin);
-  ~EncoderHCTL();
+  EncoderHctl(size_t en_1_pin, size_t en_2_pin, size_t xy_pin, size_t oe_pin, size_t sel_1_pin, size_t sel_2_pin, size_t reset_x_pin, size_t reset_y_pin);
+  ~EncoderHctl();
 
   /**
    * @brief return the number of rising-edge of the a phase pulse
